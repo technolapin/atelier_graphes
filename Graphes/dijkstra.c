@@ -3,6 +3,7 @@
 #include "graphaux.h"
 #include "graphes.h"
 
+
 #define USAGE "dijkstra <filel>"
 
 
@@ -154,6 +155,95 @@ Dijkstra_eco(graphe * g, int i, int but)
 }
 
 
+
+
+double
+heuristic_dist(graphe * g, int i, int j)
+{
+  double dx = g->x[i] - g->x[j];
+  double dy = g->y[i] - g->y[j];
+  if (dx < 0)
+    dx = -dx;
+  if (dy < 0)
+    dy = -dy;
+  return dx+dy;
+}
+
+long
+heuristic(graphe * g, int x, int but, int coeff)
+{
+  double d = heuristic_dist(g, x, but);
+  return g->v_sommets[x]+ floor(d)*coeff;
+}
+
+
+char *
+A_star(graphe * g, int i, int but, int coeff)
+{
+  int nsom, narc, k, x, y, j;
+  pcell p;
+  nsom = g->nsom;
+  narc = g->narc;
+  long int* pi = g->v_sommets; // parce que c'est plus sympa à taper
+  char* s = (char*) malloc(nsom*sizeof(char));
+  long int x_min;
+  
+
+  for (int som = 0;
+       som < nsom;
+       som++ )
+  {
+    pi[som] = -1; // on va dire que +inf = -1
+  }
+  pi[i] = 0;
+  s[i] = 1;
+
+  k = 1;
+  x = i;
+  
+  while (k < nsom && pi[x] != -1)
+  {
+    for (p = g->gamma[x]; p != NULL; p = p->next) 
+    {
+      y = p->som;
+
+      if (s[y] == 0 )
+      {
+      
+	int sum = pi[x] + p->v_arc;  //poid en x + celui de l'arc
+	if (pi[y] < 0 || pi[y] >= sum)
+	  pi[y] = sum;
+      }
+      
+    }
+    
+    x_min = x;
+    long v_min = heuristic(g, x, but, coeff);
+    long v_min_1;
+    for (y = 0; y < nsom; y++)
+    {
+      v_min_1 = heuristic(g, y, but, coeff);
+      printf("%d %d %d %d \n", x_min, y, v_min, v_min_1);
+      if ( !s[y] && pi[x] >= 0 &&
+	   (v_min_1 < v_min || s[x_min]) && pi[y] >= 0 )
+      {
+	x_min = y;
+	v_min = v_min_1;
+      }
+    }
+    s[x] = 1;
+    if (x == but)
+      return s;
+    
+    x = x_min;
+
+    
+    k++;
+  }
+  return s;
+}
+
+
 graphe *
 deep_copy(graphe * g)
 {
@@ -251,6 +341,64 @@ shortest_path( graphe * g,
   return g_1;
 }
 
+graphe *
+smart_shortest_path( graphe * g,
+		     int d,
+		     int a,
+		     int coeff)
+{
+  graphe * g_1;
+  graphe * g_sym;
+  long int* pi = g->v_sommets;
+  pcell p;
+
+  long int nsom, narc;
+  nsom = g->nsom;
+  narc = g->narc;
+  g_1 = deep_copy(g);
+  
+  char * s = A_star(g, d, a, coeff);
+
+  for (int i = 0; i < g->nsom; i++)
+    if (s[i])
+      g_1->v_sommets[i] = 1;
+    else
+      g_1->v_sommets[i] = 0;
+
+  
+  if (pi[a] == -1)
+    return g_1;
+
+  g_sym = Sym(g);
+  
+
+  long int x;
+  long int y;
+
+  x = a;
+  
+  while (x != d)
+  {
+    for (p = g_sym->gamma[x]; p != NULL; p = p->next) 
+    {
+      y = p->som;
+      if (pi[x]-pi[y] == p->v_arc)
+      {
+	AjouteArcValue( g_1,
+			y,
+			x,
+			p->v_arc );
+	x = y;
+	break;
+      }
+    }
+    //    break;
+  }
+  TermineGraphe(g_sym);
+
+  return g_1;
+}
+
 
 int
 main( int argc,
@@ -277,7 +425,8 @@ main( int argc,
   for (int i = 0; i < g->nsom; i++)
     printf("%d :    %d \n", i, (g->v_sommets)[i]);
   
-  graphe * short_g = shortest_path(g, 40, 60);
+  //  graphe * short_g = shortest_path(g, 40, 60);
+  graphe * short_g = smart_shortest_path(g, 40, 60, 4);
   printf("ENSEMBLE DES NOEUDS EXPLORES\n ");
 
   //  AfficheSuccesseurs(short_g);
