@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>rapport.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h1 id="rapport-atelier-graphes-et-algos">Rapport atelier graphes et algos</h1>
+<h2 id="partie-i">Partie I</h2>
+<h3 id="121">1.2.1</h3>
+<p>Voici l&#39;algorithme de symétrisation du programme 1.2.1 :</p>
+<pre><code class="language-c">graphe * Sym(graphe * g)
+/* ====================================================================== */
+{
+  graphe *g_1;
+  int nsom, narc, k, i, j;
+  pcell p;
+
+  nsom = g-&gt;nsom;
+  narc = g-&gt;narc;
+  g_1 = InitGraphe(nsom, narc);
+
+  for (i = 0; i &lt; nsom; i++) /* pour tout i sommet de g */
+    for (j = 0; j &lt; nsom; j++) /* pour tout j sommet de g */
+      if (EstSuccesseur(g, i, j))
+        AjouteArc(g_1, j, i);
+  return g_1;
+} /* Sym() */</code></pre>
+<p>Le double parcours des noeuds du graphe a une complexité temporelle écrasante de $nsom^2$, ce qui ne fait pas très sérieux pour de gros graphes.</p>
+<h3 id="122">1.2.2</h3>
+<p>On fait une série de tests du programme avec l&#39;algorithme de symétrisation en comléxité carrée.</p>
+<table>
+<thead>
+<tr>
+<th align="center">sommets</th>
+<th align="center">arcs</th>
+<th align="center">temps (s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">5e-06</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">1</td>
+<td align="center">5e-06</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">1</td>
+<td align="center">0.000245</td>
+</tr>
+<tr>
+<td align="center">1000</td>
+<td align="center">1</td>
+<td align="center">0.012583</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">1</td>
+<td align="center">0.687257</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">10</td>
+<td align="center">0.000228</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">100</td>
+<td align="center">0.000241</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">10</td>
+<td align="center">0.66866</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">100</td>
+<td align="center">0.669726</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">1000</td>
+<td align="center">0.683185</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">10000</td>
+<td align="center">0.821921</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">100000</td>
+<td align="center">3.38022</td>
+</tr>
+</tbody></table>
+<h3 id="123">1.2.3</h3>
+<p>On rend l&#39;algorithme qui construit le symétrique d&#39;un graphe linéaire en parcourant non pas les sommets mais les arcs.</p>
+<pre><code class="language-c">graphe * Sym(graphe * g)
+/* ====================================================================== */
+{
+  graphe *g_1;
+  int nsom, narc, k, i, j;
+  pcell p;
+
+  nsom = g-&gt;nsom;
+  narc = g-&gt;narc;
+  g_1 = InitGraphe(nsom, narc);
+
+  for (i = 0; i &lt; narc; i++)
+    AjouteArc(g_1, g-&gt;queue[i], g-&gt;tete[i]);
+
+  return g_1;
+} /* Sym() */</code></pre>
+<p>On refait la même série de test avec cette fois cet algorithme linéaire.</p>
+<table>
+<thead>
+<tr>
+<th align="center">sommets</th>
+<th align="center">arcs</th>
+<th align="center">temps (s)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">5e-06</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">1</td>
+<td align="center">3e-06</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">1</td>
+<td align="center">4e-06</td>
+</tr>
+<tr>
+<td align="center">1000</td>
+<td align="center">1</td>
+<td align="center">1.7e-05</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">1</td>
+<td align="center">6.8e-05</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">10</td>
+<td align="center">6e-06</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">100</td>
+<td align="center">1.3e-05</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">10</td>
+<td align="center">0.000131</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">100</td>
+<td align="center">9.8e-05</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">1000</td>
+<td align="center">0.000201</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">10000</td>
+<td align="center">0.000826</td>
+</tr>
+<tr>
+<td align="center">10000</td>
+<td align="center">100000</td>
+<td align="center">0.002681</td>
+</tr>
+</tbody></table>
+<p>On le sent bien le carré en moins.</p>
+<h2 id="partie-ii">Partie II</h2>
+<pre><code class="language-c">void Dijkstra(graphe * g, int i)
+{
+  int nsom, narc, k, x, y, j;
+  pcell p;
+  nsom = g-&gt;nsom;
+  narc = g-&gt;narc;
+  long int* pi = g-&gt;v_sommets; // parce que c&#39;est plus sympa à taper
+  long int* s = (long int*) malloc(nsom*sizeof(long int));
+  long int x_min;
+  // on initie tous les noeuds à -1
+  for (int som = 0;
+       som &lt; nsom;
+       som++ )
+  {
+    pi[som] = -1; // on va dire que +inf = -1
+  }
+  pi[i] = 0;
+  s[i] = 1;
+
+  k = 1;
+  x = i;
+
+  // début des itérations
+  while (k &lt; nsom &amp;&amp; pi[x] != -1)
+  {
+
+
+    // on écrit sur les éventuels noeuds non fixés encore
+    // images de x par gama
+    for (p = g-&gt;gamma[x]; p != NULL; p = p-&gt;next) 
+    {
+      y = p-&gt;som;
+
+      if (s[y] == 0 )
+      {
+
+          int sum = pi[x] + p-&gt;v_arc;  //poid en x + celui de l&#39;arc
+        if (pi[y] &lt; 0 || pi[y] &gt;= sum)
+          pi[y] = sum;
+      }
+    }
+
+
+    // on calcule le poid minimum des noeuds non-fixés
+    int min = -1;
+    for (y = 0; y &lt; nsom; y++)
+    {
+      if ( !s[y] &amp;&amp; pi[y] &gt;= 0 &amp;&amp;
+           (pi[y] &lt; min || min &lt; 0) )
+      {
+        min = pi[y];
+      }
+    }
+
+
+    // le noeud non-fixé de poid minimal est fixé et
+    // selectionné comme x de la prochaine itération
+
+    x_min = x;
+    for (y = 0; y &lt; nsom; y++)
+    {
+      if ( !s[y] &amp;&amp; pi[y] &gt;= 0 &amp;&amp;
+       (pi[y] &lt; pi[x_min] || s[x_min])  )
+      {
+    x_min = y;
+      }
+    }
+    s[x] = 1;
+    x = x_min;
+
+    k++;
+  }
+
+  free(s);
+}
+</code></pre>
+<h2 id="partie-iii">Partie III</h2>
+<pre><code class="language-c">graphe *
+shortest_path( graphe * g,
+           int d,
+           int a )
+{
+  graphe * g_1;
+  graphe * g_sym;
+  long int* pi = g-&gt;v_sommets;
+  pcell p;
+
+  long int nsom, narc;
+  nsom = g-&gt;nsom;
+  narc = g-&gt;narc;
+  g_1 = InitGraphe(nsom, narc);
+  Dijkstra(g, d);
+
+  if (pi[a] == -1)
+    return g_1;
+
+  g_sym = Sym(g);
+
+
+  long int x;
+  long int y;
+
+  x = a;
+
+  while (x != d)
+  {
+    for (p = g_sym-&gt;gamma[x]; p != NULL; p = p-&gt;next) 
+    {
+      y = p-&gt;som;
+      if (pi[x]-pi[y] == p-&gt;v_arc)
+      {
+    AjouteArcValue( g_1,
+            y,
+            x,
+            p-&gt;v_arc );
+    x = y;
+    break;
+      }
+    }
+    //    break;
+  }
+  TermineGraphe(g_sym);
+
+  return g_1;
+}
+</code></pre>
+<p>En testant sur ce graphe:</p>
+<p>6 10<br>arcs values  </p>
+<table>
+<thead>
+<tr>
+<th align="center">queue</th>
+<th align="center">tête</th>
+<th align="center">poid</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">2</td>
+<td align="center">8</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">5</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">3</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">4</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">2</td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">4</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">5</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">5</td>
+<td align="center">1</td>
+</tr>
+</tbody></table>
+<p><img src="tout_graphe.png" alt="" title="test">
+<img src="short_graphe.png" alt="" title="test"></p>
+<p>Le programme construit le bon chemin, et ça, c&#39;est bien.</p>
+<h2 id="partie-iv">Partie IV</h2>
+<p>Le graphe metro_complet et plutôt important</p>
+<p><img src="metro_complet.png" alt=""></p>
+<p>Pour aller du sommet 0 à 5:<br><img src="metro_0a5.png" alt=""></p>
+<p>Pour aller du sommet 0 à 50:<br><img src="metro_0a50.png" alt=""></p>
+<p>Pour aller du sommet 40 à 60:<br><img src="metro_40a60.png" alt=""></p>
+
+
+</body>
+</html>

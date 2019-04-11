@@ -1,0 +1,415 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<script language="JavaScript" src="sujet_fichiers/lastModDate.js">
+</script>
+</head>
+<body vlink="#307777" text="#000000" link="#A02020" bgcolor="#CCCEF4">
+
+<h1 align="CENTER">Atelier d'approfondissement en informatique - E3 -
+  PR3602 - Graphes et algorithmes</h1>
+
+<h3 align="CENTER"><a href="http://www.esiee.fr/~coupriem">Michel Couprie</a></h3>
+
+<p align="center"><img src="sujet_fichiers/metro.jpg" border="0"></p>
+
+<h2>Sujet</h2>
+
+<p>Votre but est de réaliser un logiciel permettant de calculer de
+manière efficace un plus court trajet d'une station à
+une autre dans le métro parisien. Les données (graphe du
+métro, positions des stations, temps des trajets
+élémentaires) vous seront fournies.</p>
+
+<p>Pour améliorer de manière significative les
+performances, vous mettrez en œuvre une technique d'optimisation
+utilisée pour la résolution de problèmes en
+intelligence artificielle&nbsp;: les algorithmes A*.</p>
+
+<h2>Méthode de travail</h2>
+
+Le cœur du logiciel est l'algorithme de Dijkstra,
+étudié dans l'unité
+<a href="http://www.esiee.fr/~coupriem/IT3004/">IT3004 "Graphes et Algorithmes"</a>, qui est également utilisé dans de
+nombreuses applications, en particulier les systèmes GPS, les intelligences artificielles de certains jeux video, etc. 
+
+Vous commencerez par réaliser et tester une
+implémentation "naïve" de cet algorithme, puis nous
+verrons comment l'améliorer pour en diminuer la
+complexité de calcul et le temps d'exécution.
+
+Vous pourrez diviser votre travail en une série
+d'étapes, qui sont listées ci-dessous. L'ordre des
+étapes peut être modifié dans une certaine mesure.
+
+Vous travaillerez en binome.
+
+<h2>Évaluation</h2>
+
+Vous m'enverrez par courriel, pour chaque binome, un court rapport
+présentant le travail réalisé, accompagné
+de votre programme en code source. Voici un aperçu des
+critères sur lesquels votre travail sera évalué
+(sans ordre)&nbsp;:
+<ul>
+<li>Qualité du code (lisibilité, commentaires...)
+</li><li>Qualité du rapport (forme, contenu)
+</li><li>Le programme compile correctement
+</li><li>Le programme s'exécute correctement
+</li><li>La stratégie A* est bien comprise
+</li><li>L'heuristique A* est implémentée
+</li><li>Le tas binaire est implémenté
+</li><li>Les tests sont inclus et montrent le bon fonctionnement des programmes
+</li></ul>
+
+<b>Important&nbsp;:</b> la date limite pour l'envoi des rapports est
+le <b>dimanche 21 avril</b>. Mon adresse courriel est&nbsp;: 
+<pre>michel.couprie@esiee.fr</pre>
+
+<p></p><hr width="100%" size="5"><p></p>
+<h2>1. Premiers algorithmes sur les graphes</h2>
+
+<p>
+Avant tout, récupérez le fichier <a href="https://perso.esiee.fr/~coupriem/PR3602/Graphes.tgz">Graphes.tgz</a> et décompressez-le&nbsp;:
+
+</p><pre>    tar zxvf Graphes.tgz
+    rm Graphes.tgz
+    cd Graphes; ls
+</pre>
+
+Cette archive contient des programmes C pour manipuler des graphes, la
+documentation de ces programmes se trouve ici&nbsp;:
+<p></p><center><a href="http://www.esiee.fr/~coupriem/Graphesdoc/index.html">
+<b>Documentation</b></a></center>
+
+<p>
+</p><h3>1.1 Créer et imprimer un graphe</h3>
+
+<p>
+Dans un fichier ordinaire, saisissez les données d'un graphe quelconque, sous la forme suivante&nbsp;:
+
+</p><pre>&lt;nombre_sommets&gt; &lt;nombre_arcs&gt; 
+arcs
+&lt;sommet_initial&gt; &lt;sommet_final&gt;
+&lt;sommet_initial&gt; &lt;sommet_final&gt;
+...
+</pre>
+
+<p>
+Par exemple (voir le fichier k5.graph)&nbsp;:
+
+</p><pre>5 10
+arcs
+0 1
+0 2
+0 3
+0 4
+1 2
+1 3
+1 4
+2 3
+2 4
+3 4
+</pre>
+
+<p>
+Editez les fichiers <b>exo111.c</b>, <b>exo112.c</b> et lisez-les.
+Compilez la bibliothèque&nbsp;: 
+
+</p><pre>    make
+</pre>
+
+puis compilez ces deux programmes&nbsp;:
+
+<pre>  make exo111.exe
+  make exo112.exe
+</pre>
+
+et exécutez-les&nbsp;:
+
+<pre>  ./exo111.exe k5.graph
+  ./exo112.exe k5.graph
+</pre>
+
+Ce dernier programme crée un fichier Postscript dont le nom
+reprend celui du fichier graphe donné (par exemple ici&nbsp;: k5.graph.eps).
+Vous pourrez visualiser ce fichier PostScript généré 
+grâce à <b>ghostview</b>, <b>kghostview</b> ou <b>display</b>&nbsp;:
+
+<pre>    display k5.graph.eps
+</pre>
+
+<p>
+</p><h3>1.2 Premier algorithme</h3>
+
+<p>
+Avant de passer à la suite, étudiez la <a href="https://perso.esiee.fr/~coupriem/PR3602/gamma.html">
+description des structures de données</a> utilisée pour
+représenter un graphe sous la forme &#915; (application successeurs).
+Pensez également à vous référer à la
+      documentation du code source, en particulier&nbsp;:
+</p><ul>
+<li><a href="http://www.esiee.fr/~coupriem/Graphesdoc/graphes_8h-source.html">source des définitions des
+	  principales structures (graphe, cell...)</a></li>
+<li><a href="http://www.esiee.fr/~coupriem/Graphesdoc/graph__basic_8c.html">description des fonctions de
+	  base pour la manipulation de graphes</a> (voir en
+	particulier AjouteArc, EstSuccesseur )</li> 
+</ul>
+
+<p>
+</p><h3>1.2.1 Calcul du symétrique d'un graphe</h3>
+
+<p>
+Cette fonctionnalité nous sera utile dans la suite.
+
+</p><p>
+Editez le fichier <b>exo121.c</b>, lisez-le, compilez et exécutez.
+Analyser la fonction <b>Sym</b>. Pourquoi n'est-elle pas efficace&nbsp;?
+Quelle est la complexité de calcul de l'algorithme&nbsp;?
+
+</p><p>
+</p><h3>1.2.2 Mesure du temps de calcul</h3>
+
+<p>
+Editez le fichier <b>exo122.c</b>, lisez-le, compilez et exécutez.
+Notez les temps de calculs obtenus pour diverses tailles de graphes.
+
+</p><p>
+</p><h3>1.2.3 Algorithme linéaire pour le calcul du symétrique</h3>
+
+<p>
+Dans le fichier <b>exo122.c</b>, modifiez la fonction <b>Sym</b> pour 
+rendre l'algorithme linéaire. Voici comment parcourir une liste de successeurs&nbsp;:
+
+</p><pre>  pcell p;
+  ...
+    /* pour tout sommet j successeur de i */
+    for (p = g-&gt;gamma[i]; p != NULL; p = p-&gt;next) 
+    {
+      j = p-&gt;som;    
+      ...
+
+</pre>
+Refaire les mesures de temps de calcul avec la nouvelle version, et comparer.
+<p>
+
+</p><p></p><hr width="100%" size="5"><p></p>
+<h2>2. Algorithme de Dijkstra</h2>
+
+<p>Implémentez l'<a href="https://perso.esiee.fr/~coupriem/PR3602/dijkstra.jpg">algorithme de Dijkstra</a> étudié en cours. Voici une courte description 
+de la fonction demandée&nbsp;:
+</p><pre>/* ====================================================================== */
+/*! \fn void Dijkstra(graphe * g, int i)
+    \param g (entrée) : un graphe valué (réseau). La longueur de chaque arc doit 
+                        se trouver dans le champ v_arc de la structure cell .
+    \param i (entrée) : un sommet de g.
+    \brief calcule, pour chaque sommet x de g, la longueur d'un plus court
+           chemin de i vers x. Cette longueur est stockée dans le champ
+           v_sommets de g .
+*/
+/* ====================================================================== */
+</pre>
+
+<p>Testez votre programme sur un graphe de taille réduite de votre
+choix (<a href="https://perso.esiee.fr/~coupriem/PR3602/test_dijkstra.graph">celui-ci par exemple</a>).
+
+</p><p>Fonctions et données utiles&nbsp;:
+</p><ul>
+<li>Les longueurs des arcs sont stockées dans le champ "v_arc" de la structure "cell" (voir définitions dans <a href="http://www.esiee.fr/~coupriem/Graphesdoc/graphes_8h.html">graphes.h</a>). 
+</li><li>Les valeurs associées aux arcs et aux sommets sont de type
+      <b>long</b> (voir définitions dans <a href="http://www.esiee.fr/~coupriem/Graphesdoc/graphes_8h.html">graphes.h</a>). 
+      On pourra utiliser la constante LONG_MAX pour représenter l'infini. </li>
+</ul>
+
+<p></p><hr width="100%" size="5"><p></p>
+<h2>3. Trouver un plus court chemin</h2>
+
+<p>Implémentez un algorithme de recherche de plus court chemin d'un sommet <b>d</b> vers
+un sommet <b>a</b>, qui se base sur les valeurs calculées par Dijkstra.
+Voici une courte description de la fonction demandée&nbsp;:
+
+</p><pre>/* ====================================================================== */
+/*! \fn graphe * PCC(graphe * g, int d, int a)
+    \param g (entrée) : un graphe valué (réseau). La longueur de chaque arc doit 
+                        se trouver dans le champ v_arc de la structure cell .
+    \param d (entrée) : un sommet (départ).
+    \param a (entrée) : un sommet (arrivée).
+    \return un plus court chemin de d vers a dans g , représenté par un graphe.
+    \brief retourne un plus court chemin de d vers a dans g .
+*/
+/* ====================================================================== */
+</pre>
+
+<p>On pourra améliorer le temps de calcul en stoppant l'algorithme de
+Dijkstra dès que le sommet <b>a</b> est atteint.
+
+</p><p>Testez votre programme sur un graphe de taille réduite de votre choix.
+
+</p><p>Fonctions et données utiles&nbsp;:
+</p><ul>
+<li><a href="http://www.esiee.fr/~coupriem/Graphesdoc/graph__basic_8c.html#a6">InitGraphe()</a></li>
+<li><a href="http://www.esiee.fr/~coupriem/Graphesdoc/graph__basic_8c.html#a9">AjouteArc()</a></li>
+<li>La fonction Sym() réalisée précédemment</li>
+</ul>
+
+<p></p><hr width="100%" size="5"><p></p>
+<h2>4. Test sur données réelles</h2>
+
+<p>Vous trouverez dans le fichier <a href="https://perso.esiee.fr/~coupriem/PR3602/metro_complet.graph">metro_complet.graph</a>
+un graphe valué construit de la façon suivante&nbsp;:
+</p><ul>
+<li>Chaque sommet correspond à une station pour une ligne donnée (par exemple, 
+<i>République [ligne 3]</i> et <i>République [ligne 5]</i> sont deux sommets différents).</li>
+<li>A chaque sommet est associé la position de la station sur une carte 
+(échelle&nbsp;: 1~25.7m).</li>
+<li>A chaque sommet est associé le nom de la station (chaîne de caractères).</li>
+<li>Deux sommets forment un arc orienté si le métro relie directement les 
+stations correspondantes 
+(le graphe n'est pas symétrique à cause de quelques "sens uniques", par exemple
+du côté de la porte d'Auteuil). Cet arc est valué par le temps estimé du trajet en secondes 
+(en prenant pour base une vitesse moyenne de 10m/s, soit 36km/h).</li>
+<li>Deux sommets forment deux arcs symétriques l'un de l'autre 
+s'il est possible de passer à pied sans changer de billet entre
+les stations correspondantes. Ces arcs sont alors valués
+par une estimation du temps moyen de trajet et d'attente (120s).</li>
+</ul>
+
+Visualisez le graphe du métro parisien grâce au programme
+    <b>graphe2ps.exe</b>&nbsp;:
+<pre>    make graphe2ps.exe
+    graphe2ps.exe metro_complet.graph
+    display metro_complet.graph.eps
+</pre>
+
+Testez votre algorithme de recherche d'un plus court chemin sur le
+graphe du métro. Visualisez
+(voir <a href="http://www.esiee.fr/~coupriem/Graphesdoc/graph__print_8c.html#a6">EPSGraphe</a>)
+le plus court chemin obtenu ainsi que l'ensemble des sommets explorés par l'algorithme de Dijkstra,
+pour quelques exemples de trajets dans le métro.
+
+<!--
+<P><HR WIDTH="100%" SIZE=5></P>
+<H2>5. Une premi&egrave;re am&eacute;lioration de Dijkstra</H2>
+
+<P>Dans l'algorithme de Dijkstra, les sommets n'appartenant pas &agrave;
+<B>S</B> peuvent se diviser en deux sous-ensembles&nbsp;:
+<UL>
+<LI>l'ensemble <B>T</B> qui contient les sommets hors de <B>S</B> et
+	de valuation finie, et</LI>
+<LI>l'ensemble <B>U</B> qui contient les sommets hors de <B>S</B> et
+	de valuation infinie.</LI>
+</UL>
+Dans la version la plus simple de Dijkstra, on recherche le sommet de
+valuation minimale dans [<B>T</B> union <B>U</B>], et ceci en
+parcourant tous les sommets du graphe. Il est possible d'am&eacute;liorer
+l'algorithme en introduisant une variable qui repr&eacute;sente
+l'ensemble <B>T</B> (sous la forme d'une liste) pour limiter la
+recherche &agrave; cet ensemble.
+
+<P>Impl&eacute;mentez cette am&eacute;lioration et testez-la.
+-->
+
+<p></p><hr width="100%" size="5"><p></p>
+<h2>5. Introduction aux algorithmes A*</h2>
+
+Une amélioration significative de cette méthode peut
+être apportée en utilisant la stratégie dite A*
+(prononcez A-étoile en français, A-star en anglais).
+
+<p>
+La technique A* est résumée dans le document ci-dessous : 
+<br>
+<a href="https://perso.esiee.fr/~coupriem/PR3602/pr3602.pdf">Résolution de problèmes en intelligence artificielle et
+optimisation combinatoire : les algorithmes A*</a>
+<br>
+Sa grande force est de garantir l'optimalité de la solution trouvée
+tout en parcourant seulement une partie, et parfois une très petite
+partie, du graphe de recherche qui peut être immense. Je vous
+encourage vivement à lire le chapitre 2 du livre de N. Nilsson :
+"Principes d'Intelligence artificielle" (disponible à la
+bibliothèque), qui contient une description beaucoup plus détaillée de
+A*, avec en particulier la démonstration de cette propriété
+remarquable.
+</p>
+<p>
+Pour bien comprendre l'algorithme, il faut l'exécuter "à la main" sur
+plusieurs exemples de problèmes et d'heuristiques. Vous trouverez dans
+la présentation suivante un exemple d'exécution pour la résolution
+d'un problème de jeu de taquin.
+<br>
+<a href="https://perso.esiee.fr/~coupriem/PR3602/PR3602.ppt">Présentation powerpoint</a>
+</p>
+<p>
+La plus grande difficulté dans l'utilisation de la technique A* est 
+de trouver de bonnes heuristiques
+qui satisfont à la condition garantissant l'optimalité de la solution.
+Pour vous y entraîner, voici quelques
+problèmes choisis, pour lesquelles il existe des heuristiques
+simples et performantes. 
+<br>
+<a href="https://perso.esiee.fr/~coupriem/PR3602/td6_1.pdf">Problèmes 1 et 2</a>
+<br>
+<a href="https://perso.esiee.fr/~coupriem/PR3602/td6_2.pdf">Problème 3</a>
+</p>
+
+<p></p><hr width="100%" size="5"><p></p>
+<h2>6. Stratégie A* pour le problème des trajets dans le métro</h2>
+
+<p>
+Il suffit maintenant de modifier légèrement l'algorithme
+de Dijkstra pour implémenter la stratégie A* retenue
+pour notre problème (qui correspond au problème 2 ci-dessus).
+
+</p><p>
+Réalisez cette implémentation, et visualisez (voir 
+<a href="http://www.esiee.fr/~coupriem/Graphesdoc/graph__print_8c.html#a6">EPSGraphe</a>)
+l'ensemble des sommets explorés pour quelques exemples de
+trajets. Comparez le nombre de ces sommets avec le nombre de sommets
+explorés par Dijkstra.
+
+</p><p></p><hr width="100%" size="5"><p></p>
+<h2>7. Accélération de la recherche de l'élément minimal</h2>
+
+<p>
+L'opération qui coûte le plus globalement, dans l'algorithme de Dijkstra
+ avec ou sans heuristique A*, est la recherche de l'élément minimal dans
+ une liste de sommets valués qui est maintenue à jour, avec des 
+opérations d'ajout, de retrait, et de modification des valeurs.
+
+</p><p>
+Pour une liste contenant à un moment donné <i>N</i> sommets, l'algorithme naïf pour trouver l'élément minimal est en <i>O(N)</i>. 
+
+</p><p>
+Il est possible, grâce à une structure de données
+adaptée, de réduire ce coût à une
+constante, tout en garantissant un  coût en <i>O(log N)</i> pour
+les autres opérations. Plusieurs solutions sont possibles&nbsp;: tas binaires, tas binomiaux, tas de Fibonacci...
+
+</p><p>
+Les tas binaires représentent un bon compromis entre l'efficacité 
+algorithmique et la facilité de compréhension et d'implémentation. Vous 
+trouvez sur cette <a href="http://fr.wikipedia.org/wiki/Tas_binaire">page Wikipedia</a> une description du principe de la structure de tas binaire.
+
+</p><p>
+Vous implémenterez un tas binaire, que vous testerez seul dans un premier temps, et que vous intégrez à votre logiciel ensuite. 
+
+</p><p>
+Réalisez quelques mesures (voir 1.2.2) pour mettre en évidence le gain en temps de calcul.
+
+</p><p></p><hr width="100%" size="5"><p></p>
+<p><b> Remerciements</b>
+</p><p>Nous tenons à remercier la RATP pour les données
+mises  à disposition sur son site Web, ainsi que L. Granboulan
+et L. Mauborgne de l'ENS, auteurs d'un 
+<a href="http://www.di.ens.fr/~granboul/enseignement/mmfai/algo2001-2002/tp7/">TP sur
+la recherche de plus courts chemins dans le métro</a> dont nous 
+nous sommes inspirés pour partie.
+
+</p><hr>
+<font size="-2">
+Dernière mise à jour&nbsp;:
+<script language="JavaScript">writeLMDate();</script>
+&nbsp;par Michel Couprie.
+</font>
+
+
+</body></html>
