@@ -6,8 +6,10 @@
 #include <string.h>
 #include <math.h>
 
+
 #define TYP_VARC long
-#define TYP_VSOM long
+#define TYP_VSOM long//#include "tas_binaire.h"
+
 #ifndef HUGE
 #define HUGE HUGE_VAL
 #endif
@@ -68,7 +70,7 @@ typedef struct graphe {
   pcell libre;      
 //!  tableau des listes de successeurs indexé par les sommets 
   pcell * gamma;    
-
+  
   /* representation par liste d'arcs 
      (vecteurs tete (sommet initial), queue (sommet final)) */
 
@@ -92,7 +94,8 @@ typedef struct graphe {
 //!  ordonnees des sommets 
   double *y;        
 //!  noms des sommets 
-  char **nomsommet; 
+  char **nomsommet;
+  
 } graphe;
 
 /* ================================================ */

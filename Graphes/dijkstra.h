@@ -35,3 +35,13 @@ smart_shortest_path( graphe * g,
 		     int d,
 		     int a,
 		     int coeff);
+
+char *
+A_star_quick(graphe * g, int i, int but, int coeff);
+
+
+graphe *
+smarter_shortest_path( graphe * g,
+		       int d,
+		       int a,
+		       int coeff);

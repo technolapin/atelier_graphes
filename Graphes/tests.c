@@ -23,7 +23,6 @@ void
 test_a_star(graphe* g, char * buf, char **argv, int start, int goal, int coeff)
 {
   graphe * short_g = smart_shortest_path(g, start, goal, coeff);
-
   sprintf(buf, "a_star.eps", argv[1]);
   EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0); 
   TermineGraphe(short_g);
@@ -33,7 +32,7 @@ test_a_star(graphe* g, char * buf, char **argv, int start, int goal, int coeff)
 void
 test_tas(graphe * g, int start)
 {
-    Dijkstra(g, start);
+  Dijkstra(g, start);
 
 
   tas_binaire tas = cree_tas();
@@ -66,6 +65,18 @@ test_tas(graphe * g, int start)
 
 }
 
+
+void
+test_a_star_tas(graphe* g, char * buf, char **argv, int start, int goal, int coeff)
+{
+  graphe * short_g = smarter_shortest_path(g, start, goal, coeff);
+  sprintf(buf, "tas_a_star.eps", argv[1]);
+  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0); 
+  TermineGraphe(short_g);
+}
+
+
+
 int
 main( int argc,
       char **argv )
@@ -93,7 +104,8 @@ main( int argc,
 
   test_dijkstra(g, buf, argv, start, goal);
   test_a_star(g, buf, argv, start, goal, coeff);
-  //  test_tas(g, start);
+  //test_tas(g, start);
+  test_a_star_tas(g, buf, argv, start, goal, coeff);
 
   ///////////
   TermineGraphe(g);

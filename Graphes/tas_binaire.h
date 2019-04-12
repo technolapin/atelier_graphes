@@ -1,3 +1,4 @@
+
 typedef struct _noeud_tas_binaire
 {
   int sommet;
@@ -39,3 +40,8 @@ pop_min(tas_binaire *tas);
 
 int
 pop_tas(tas_binaire *tas);
+
+/*
+void
+ajoute_sommet_heuristique(tas_binaire *tas, graphe * g, int i, int but, int coeff);
+*/
