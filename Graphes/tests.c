@@ -13,9 +13,8 @@ test_dijkstra(graphe* g, char * buf, char **argv, int start, int goal)
     printf("%d :    %d \n", i, (g->v_sommets)[i]);
   graphe * short_g = shortest_path(g, start, goal);
 
-  AutoNomsSommets(short_g, 1);               /* noms des sommet = indices */
-  sprintf(buf, "dijkstra.eps", argv[1]);     /* construit le nom du fichier PostScript */
-  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0);         /* genere une figure en PostScript */
+  sprintf(buf, "dijkstra.eps", argv[1]);
+  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0);
 
   TermineGraphe(short_g);
 }
@@ -25,10 +24,8 @@ test_a_star(graphe* g, char * buf, char **argv, int start, int goal, int coeff)
 {
   graphe * short_g = smart_shortest_path(g, start, goal, coeff);
 
-  AutoNomsSommets(short_g, 1);               /* noms des sommet = indices */
-  sprintf(buf, "a_star.eps", argv[1]);     /* construit le nom du fichier PostScript */
-  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0);         /* genere une figure en PostScript */
-
+  sprintf(buf, "a_star.eps", argv[1]);
+  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0); 
   TermineGraphe(short_g);
 }
 
@@ -96,7 +93,7 @@ main( int argc,
 
   test_dijkstra(g, buf, argv, start, goal);
   test_a_star(g, buf, argv, start, goal, coeff);
-  test_tas(g, start);
+  //  test_tas(g, start);
 
   ///////////
   TermineGraphe(g);
