@@ -1,0 +1,54 @@
+int
+main( int argc,
+      char **argv )
+{
+  // comme dans le 1.1.1
+  graphe *g;
+  char buf[256];
+  
+  if (argc != 2)
+  {
+    fprintf(stderr, "usage: %s <filename>\n%s\n", argv[0], USAGE);
+    exit(0);
+  }
+
+  int start;
+  int goal;
+  int coeff;
+  printf("start end coeff: ");
+  scanf("%d %d %d", &start, &goal, &coeff);
+
+  g = ReadGraphe(argv[1]);  /* lit le graphe a partir du fichier */
+
+  
+  ///////////
+
+  
+  Dijkstra(g, 0);
+
+  for (int i = 0; i < g->nsom; i++)
+    printf("%d :    %d \n", i, (g->v_sommets)[i]);
+  
+  //  graphe * short_g = shortest_path(g, 40, 60);
+  graphe * short_g = smart_shortest_path(g, start, goal, coeff);
+
+
+  AutoNomsSommets(g, 1);               /* noms des sommet = indices */
+  sprintf(buf, "tout_graphe.eps", argv[1]);     /* construit le nom du fichier PostScript */
+  EPSGraphe(g, buf, 3, 0, 60, 0, 0, 0, 0);         /* genere une figure en PostScript */
+
+  AutoNomsSommets(short_g, 1);
+  sprintf(buf, "short_graphe.eps", argv[1]);
+  EPSGraphe(short_g, buf, 3, 0, 60, 0, 0, 1, 0);
+
+
+
+  
+  
+  
+  ///////////
+  TermineGraphe(g);
+  TermineGraphe(short_g);
+  return 0;
+
+}

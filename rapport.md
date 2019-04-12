@@ -266,3 +266,140 @@ Pour aller du sommet 0 à 50:
 
 Pour aller du sommet 40 à 60:  
 ![](metro_40a60.png)
+
+
+## Parties V-VI
+
+Dijkstra marche plutôt bien, mais beaucoup de noeuds sont explorés avant de trouver le bon chemin.
+On va donc essayer une autre stratégie, ne plus prendre en compte que le poid minimum des noeuds de proche en proche, mais on va ajouter à celà la proximité géographique des noeuds au but. Ça sera une implémentation de l'algorithme A*
+
+
+```c
+
+double // retourne la distance entre i et j dans g
+heuristic_dist(graphe * g, int i, int j)
+{
+  double dx = g->x[i] - g->x[j];
+  double dy = g->y[i] - g->y[j];
+  if (dx < 0)
+    dx = -dx;
+  if (dy < 0)
+    dy = -dy;
+  return dx+dy; // il semble peu avantageux de calculer une racine carrée, la norme N1 suffit comme critère de proximité.
+}
+
+long // retourne le poid du noeud x avec critère géographique
+heuristic(graphe * g, int x, int but, int coeff)
+{
+  double d = heuristic_dist(g, x, but);
+  return g->v_sommets[x]+ floor(d)*coeff;
+  // coeff sert à donner plus ou moins d'importance au critère géographique
+}
+
+
+char * // notre Dijkstra_eco modifié pour en faire un A*
+A_star(graphe * g, int i, int but, int coeff)
+{
+  int nsom, narc, k, x, y, j;
+  pcell p;
+  nsom = g->nsom;
+  narc = g->narc;
+  long int* pi = g->v_sommets; // parce que c'est plus sympa à taper
+  char* s = (char*) malloc(nsom*sizeof(char));
+  long int x_min;
+  
+
+  for (int som = 0;
+       som < nsom;
+       som++ )
+  {
+    pi[som] = -1; // on va dire que +inf = -1
+  }
+  pi[i] = 0;
+  s[i] = 1;
+
+  k = 1;
+  x = i;
+  
+  while (k < nsom && pi[x] != -1)
+  {
+    for (p = g->gamma[x]; p != NULL; p = p->next) 
+    {
+      y = p->som;
+
+      if (s[y] == 0 )
+      {
+      
+	int sum = pi[x] + p->v_arc;  //poid en x + celui de l'arc
+	if (pi[y] < 0 || pi[y] >= sum)
+	  pi[y] = sum;
+      }
+      
+    }
+
+    // ce qui a été modifié par rapport à Dijkstra_eco
+    x_min = x;
+    long v_min = heuristic(g, x, but, coeff);
+    long v_min_1;
+    for (y = 0; y < nsom; y++)
+    {
+      v_min_1 = heuristic(g, y, but, coeff);
+      printf("%d %d %d %d \n", x_min, y, v_min, v_min_1);
+      if ( !s[y] && pi[x] >= 0 &&
+	   (v_min_1 < v_min || s[x_min]) && pi[y] >= 0 )
+      {
+	x_min = y;
+	v_min = v_min_1;
+      }
+    }
+    
+    s[x] = 1;
+    if (x == but)
+      return s;
+    
+    x = x_min;
+
+    
+    k++;
+  }
+  return s;
+}
+
+```
+
+Avec Dijkstra:  
+![](metro_40a60.png)  
+Avec coeff = 1:  
+![](a_star_40a60_coeff1.png)  
+Avec coeff = 2:  
+![](a_star_40a60_coeff2.png)  
+Avec coeff = 3:  
+![](a_star_40a60_coeff3.png)  
+Avec coeff = 4:  
+![](a_star_40a60_coeff4.png)  
+
+On remarque qu'à partir d'un certain coeff, le chemin n'est plus optimal.
+A* privilégie la rapidité d'exécution à la qualité du résultat.
+coeff = 3 semble être un bon compromis néanmoins.
+
+
+## Partie 7
+
+On cherche à faire une implémentation de tas binaires de sommets triés par poids.
+Il suffit de stocker le numéro de chaque sommet dans les noeuds du tas et de mettre le graphe en paramètre des fonctions nécessitant l'accès aux poids, ainsi notre arbre reste simple.
+
+Voici la structure:
+```c
+typedef struct _noeud_tas_binaire
+{
+  int sommet;
+  struct _noeud_tas_binaire * gauche;
+  struct _noeud_tas_binaire * droite;
+} noeud_tas_binaire, *tas_binaire;
+
+
+```
+
+J'implémente ensuite toute les fonctions qui pourraient être utiles (cf tas_binaire.h)
+
+

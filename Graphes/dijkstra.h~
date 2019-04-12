@@ -4,6 +4,8 @@
 #include "graphes.h"
 
 
+#define USAGE "dijkstra <filel>"
+
 
 graphe * Sym(graphe * g)
 {
@@ -399,6 +401,8 @@ smart_shortest_path( graphe * g,
 
   return g_1;
 }
+
+
 
 
 

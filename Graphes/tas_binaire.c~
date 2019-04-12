@@ -1,0 +1,13 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "graphaux.h"
+#include "graphes.h"
+
+
+
+typedef struct _tas_binaire
+{
+  int value;
+  struct _tas_binaire * gauche;
+  struct _tas_binaire * droite;
+}
