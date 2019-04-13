@@ -111,10 +111,10 @@ Dijkstra_eco(graphe * g, int i, int but)
   pi[i] = 0;
   s[i] = 1;
 
-  k = 1;
+  k = 0;
   x = i;
   
-  while (k < nsom && pi[x] != -1)
+  while (pi[x] != -1)
   {
     for (p = g->gamma[x]; p != NULL; p = p->next) 
     {
@@ -141,6 +141,7 @@ Dijkstra_eco(graphe * g, int i, int but)
       }
     }
     s[x] = 1;
+    
     if (x == but)
       return s;
     
@@ -461,14 +462,6 @@ A_star_quick(graphe * g, int i, int but, int coeff)
     for (p = g->gamma[x]; p != NULL; p = p->next) 
     {
       y = p->som;
-  /*
-  for (j = 0; j < g->nsom; j++)
-  {
-    if (but != j)
-      ajoute_sommet_heuristique(&tas, g, j, but, coeff);
-  }
-  */
-
       if (s[y] == 0 )
       {
       

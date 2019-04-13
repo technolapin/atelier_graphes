@@ -1,3 +1,4 @@
+
 #include "dijkstra.h"
 #include "tas_binaire.h"
 #define USAGE "tests <filel>"
@@ -81,15 +82,18 @@ int
 main( int argc,
       char **argv )
 {
-  // comme dans le 1.1.1
   graphe *g;
   char buf[256];
+  char buff[256];
+  char bufff[256];
   int start;
   int goal;
   int coeff;
   printf("start end coeff: ");
-  scanf("%d %d %d", &start, &goal, &coeff);
-  
+  //  scanf("%d %d %d", &start, &goal, &coeff);
+  start = 1;
+  goal = 90;
+  coeff = 3;
   if (argc != 2)
   {
     fprintf(stderr, "usage: %s <filename>\n%s\n", argv[0], USAGE);
@@ -102,13 +106,14 @@ main( int argc,
   
   ///////////
 
+  
+  
   test_dijkstra(ReadGraphe(argv[1]), buf, argv, start, goal);
-  char buff[256];
+
   test_a_star(ReadGraphe(argv[1]), buff, argv, start, goal, coeff);
   //test_tas(g, start);
-  char bufff[256];
   test_a_star_tas(ReadGraphe(argv[1]), bufff, argv, start, goal, coeff);
-
+  
   ///////////
   TermineGraphe(g);
   return 0;
