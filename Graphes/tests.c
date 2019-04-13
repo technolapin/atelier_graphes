@@ -102,10 +102,12 @@ main( int argc,
   
   ///////////
 
-  test_dijkstra(g, buf, argv, start, goal);
-  test_a_star(g, buf, argv, start, goal, coeff);
+  test_dijkstra(ReadGraphe(argv[1]), buf, argv, start, goal);
+  char buff[256];
+  test_a_star(ReadGraphe(argv[1]), buff, argv, start, goal, coeff);
   //test_tas(g, start);
-  test_a_star_tas(g, buf, argv, start, goal, coeff);
+  char bufff[256];
+  test_a_star_tas(ReadGraphe(argv[1]), bufff, argv, start, goal, coeff);
 
   ///////////
   TermineGraphe(g);

@@ -203,8 +203,9 @@ A_star(graphe * g, int i, int but, int coeff)
   k = 1;
   x = i;
   
-  while (k < nsom && pi[x] != -1)
+  while (k < nsom || pi[x] == -1)
   {
+    printf("k: %d pi[%d]=%d\n", k, x, pi[x]);
     for (p = g->gamma[x]; p != NULL; p = p->next) 
     {
       y = p->som;
@@ -212,7 +213,7 @@ A_star(graphe * g, int i, int but, int coeff)
       if (s[y] == 0 )
       {
       
-	int sum = pi[x] + p->v_arc;  //poid en x + celui de l'arc
+	int sum = heuristic(g, x, but, coeff) + p->v_arc;  //poid en x + celui de l'arc
 	if (pi[y] < 0 || pi[y] >= sum)
 	  pi[y] = sum;
       }
@@ -222,11 +223,11 @@ A_star(graphe * g, int i, int but, int coeff)
     // ce qui a été modifié par rapport à Dijkstra_eco
     x_min = x;
     //long v_min = heuristic(g, x, but, coeff);
-    long v_min = -1;
+    long v_min = pi[x];
     long v_min_1;
     for (y = 0; y < nsom; y++)
     {
-      v_min_1 = heuristic(g, y, but, coeff);
+      v_min_1 = pi[y];
       if ( !s[y] && pi[y] >= 0 &&
 	   (v_min_1 < v_min || s[x_min]) && pi[x_min] >= 0 )
       {
@@ -234,7 +235,6 @@ A_star(graphe * g, int i, int but, int coeff)
 	v_min = v_min_1;
       }
     }
-    
     s[x] = 1;
     if (x == but)
       return s;
@@ -363,19 +363,19 @@ smart_shortest_path( graphe * g,
   g_1 = deep_copy(g);
   
   char * s = A_star(g, d, a, coeff);
-  
+
   for (int i = 0; i < g->nsom; i++)
     if (s[i])
       g_1->v_sommets[i] = 1;
     else
       g_1->v_sommets[i] = 0;
-  
+
   
   if (pi[a] == -1)
     return g_1;
 
   g_sym = Sym(g);
-  
+
 
   long int x;
   long int y;
@@ -389,6 +389,7 @@ smart_shortest_path( graphe * g,
       y = p->som;
       if (pi[x]-pi[y] == p->v_arc)
       {
+	printf("wwww x:%d   y:%d \n", x, y);
 	AjouteArcValue( g_1,
 			y,
 			x,
@@ -422,9 +423,9 @@ ajoute_sommet_heuristique(tas_binaire *tas, graphe * g, int i, int but, int coef
   int di = heuristic(g, i, but, coeff);
   int dj = heuristic(g, j, but, coeff);
   if (di < dj && di != -1 || dj == -1)
-    ajoute_sommet_heuristique(&(*tas)->gauche, g, i, but, coeff);
+    ajoute_sommet(&(*tas)->gauche, g, i);
   else
-    ajoute_sommet_heuristique(&(*tas)->droite, g, i, but, coeff);
+    ajoute_sommet(&(*tas)->droite, g, i);
     
 }
 
@@ -437,12 +438,18 @@ A_star_quick(graphe * g, int i, int but, int coeff)
   pcell p;
   nsom = g->nsom;
   narc = g->narc;
-  long int* pi = g->v_sommets;
+  long int* pi = g->v_sommets; // parce que c'est plus sympa à taper
   char* s = (char*) malloc(nsom*sizeof(char));
   long int x_min;
 
   tas_binaire tas = cree_tas();
-
+  /*
+  for (j = 0; j < g->nsom; j++)
+  {
+    if (but != j)
+      ajoute_sommet_heuristique(&tas, g, j, but, coeff);
+  }
+  */
   for (int som = 0;
        som < nsom;
        som++ )
@@ -461,23 +468,14 @@ A_star_quick(graphe * g, int i, int but, int coeff)
     for (p = g->gamma[x]; p != NULL; p = p->next) 
     {
       y = p->som;
-  /*
-  for (j = 0; j < g->nsom; j++)
-  {
-    if (but != j)
-      ajoute_sommet_heuristique(&tas, g, j, but, coeff);
-  }
-  */
 
       if (s[y] == 0 )
       {
       
 	int sum = pi[x] + p->v_arc;  //poid en x + celui de l'arc
 	if (pi[y] < 0 || pi[y] >= sum)
-	{
 	  pi[y] = sum;
-	  ajoute_sommet_heuristique(&tas, g, y, but, coeff);
-	}
+	ajoute_sommet_heuristique(&tas, g, y, but, coeff);
       }
       
     }
@@ -524,7 +522,7 @@ smarter_shortest_path( graphe * g,
       g_1->v_sommets[i] = 1;
     else
       g_1->v_sommets[i] = 0;
-  
+
   
   if (pi[a] == -1)
     return g_1;
@@ -552,6 +550,7 @@ smarter_shortest_path( graphe * g,
 	break;
       }
     }
+    //    break;
   }
   TermineGraphe(g_sym);
 
